@@ -1,0 +1,307 @@
+---
+title: |
+  | \Huge MSiA 400 Lab Assignment 2: mjk3551
+author: |
+  | \Large
+  | \Large Matt Ko
+output:
+  pdf_document: default
+  word_document: default
+---
+```{r setup, include=FALSE, message = FALSE, warning=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
+```
+
+## Problem 1a
+
+### Split the data into testing, training, and validation datasets for cross validation (CV). First, hold out 20% for your test dataset. On the remaining 80%, split it into 5 folds. Make sure to seed your random number generator and/or store the indices to ensure your datasets remain consistent through runs.
+
+```{r}
+admits <- read.csv("gradAdmit.csv")
+```
+
+```{r}
+set.seed(314159)
+n = nrow(admits) # number of samples
+# hold out 20% for testing
+sample = sample.int(n = n, size = floor(.2*n), replace = F)
+train = admits[-sample,]; test = admits[sample,]
+
+```
+
+```{r, message=F, warning=F}
+library(caret)
+```
+```{r kFold}
+nfolds = 5
+folds = createFolds(1:n, k=nfolds)
+```
+
+
+## Problem 1b
+
+### Train a number of SVM models (using different hyperparameters) on the training set for each CV fold. For each run, report the accuracy on both the training and validation datasets, averaged over the folds. Use the same split as Problem 1a. Try using various kernel functions, such as linear, polynomial, radial basis (or Gaussian), etc. Also, try to tune their respective hyperparameters (degree, gamma, and coef0), and the value for cost (or C), based on the validation accuracy. For a full list of the SVM arguments, visit https://www.rdocumentation.org/packages/e1071/versions/1.7-2/topics/svm. Which kernel(s) perform better than others for this problem? Which hypereparameter values are optimal? Which model performed best on the validation dataset? Do NOT use parameter fitting functions from other R packages.
+
+```{r, message=F, warning=F}
+library(e1071)
+```
+```{r}
+tuneSVM <- function(kernel,cost,gamma,coef0,degree){
+  
+  trainaccyarr = c(0,0,0,0,0)
+  valaccarr = c(0,0,0,0,0)
+  
+  for (i in 1:nfolds){
+      train = admits[-folds[[i]],]
+      validation = admits[folds[[i]],]
+      if(missing(gamma)){ #linear
+        smodel <- svm(factor(admit)~.,kernel=kernel,cost=cost, data=train)
+      }
+      else if(missing(coef0)){ #radial
+        smodel <- svm(factor(admit)~.,kernel=kernel,cost=cost,gamma=gamma, data=train)
+      }
+      else if(missing(degree)){ #sigmoid
+        smodel <- svm(factor(admit)~.,kernel=kernel,cost=cost,gamma=gamma, data=train)
+      }
+      else{ #polynomial
+        smodel <- svm(factor(admit)~.,kernel=kernel,cost=cost,gamma=gamma,degree=degree,coef0=coef0,
+            data=train)
+      }
+      trainpred = predict(smodel,newdata=train)
+      traintest = confusionMatrix(factor(train$admit), trainpred)
+      trainacc = traintest$overall['Accuracy']
+      valpredict = predict(smodel,newdata=validation)
+      valtest = confusionMatrix(factor(validation$admit), valpredict)
+      valacc = valtest$overall['Accuracy']
+      
+      trainaccyarr[i] <- trainacc
+      valaccarr[i] <- valacc
+      
+      
+  }
+  
+  meantrain <- mean(trainaccyarr)
+  meanval <- mean(valaccarr)
+  
+  if(missing(gamma)){ #linear
+      infodf <- data.frame(
+      
+          kernel = kernel,
+      
+          cost = cost,
+      
+          gamma = "NULL",
+          
+          coef0 = "NULL",
+          
+          degree = "NULL",
+          
+          trainavg = meantrain,
+          
+          valavg = meanval
+      
+      )
+  }
+  else if(missing(coef0)){ #radial
+      infodf <- data.frame(
+      
+          kernel = kernel,
+      
+          cost = cost,
+      
+          gamma = gamma,
+          
+          coef0 = "NULL",
+          
+          degree = "NULL",
+          
+          trainavg = meantrain,
+          
+          valavg = meanval
+      
+      )
+  }
+  else if(missing(degree)){ #sigmoid
+      infodf <- data.frame(
+      
+          kernel = kernel,
+      
+          cost = cost,
+      
+          gamma = gamma,
+          
+          coef0 = coef0,
+          
+          degree = "NULL",
+          
+          trainavg = meantrain,
+          
+          valavg = meanval
+      
+      )
+  }
+  else{ #polynomial
+      infodf <- data.frame(
+      
+          kernel = kernel,
+      
+          cost = cost,
+      
+          gamma = gamma,
+          
+          coef0 = coef0,
+          
+          degree = degree,
+          
+          trainavg = meantrain,
+          
+          valavg = meanval
+      )
+  }
+  
+  return(infodf)
+  
+  
+}
+
+```
+
+```{r}
+mdf <- data.frame(
+    
+          kernel = character(),
+      
+          cost = double(),
+      
+          gamma = double(),
+          
+          coef0 = double(),
+          
+          degree = integer(),
+          
+          trainavg = double(),
+          
+          valavg = double())
+```
+
+```{r}
+gammas = c( 0.1, 0.333, 0.5, 0.8, 1)
+coef0s = c(0, 0.01, 0.1, 1)
+costs = c(0.001, 0.01, 0.1, 1 )
+degrees = c(3,4,5)
+```
+
+```{r}
+
+for(i in 1:length(costs)){
+  
+  ldf = tuneSVM('linear',cost = costs[i])
+  mdf <- rbind(mdf, ldf)
+  
+}
+
+```
+
+
+```{r}
+
+for(i in 1:length(costs)){
+  
+  for(j in 1:length(gammas)){
+    
+    rdf = tuneSVM('radial',cost = costs[i],gamma = gammas[j])
+    mdf <- rbind(mdf, rdf)
+    
+  }
+  
+}
+
+```
+
+```{r}
+
+for(i in 1:length(costs)){
+  
+  for(j in 1:length(gammas)){
+    
+    for(k in 1:length(coef0s)){
+      
+      sdf = tuneSVM('sigmoid',cost = costs[i],gamma = gammas[j], coef0 = coef0s[k])
+      mdf <- rbind(mdf, sdf)
+      
+    }
+    
+  }
+  
+}
+
+
+```
+
+```{r}
+
+for(i in 1:length(costs)){
+  
+  for(j in 1:length(gammas)){
+    
+    for(k in 1:length(coef0s)){
+      
+      for(l in 1:length(degrees)){
+        
+        pdf = tuneSVM('polynomial',cost = costs[i],gamma = gammas[j], coef0 = coef0s[k],degree = degrees[l])
+        mdf <- rbind(mdf, pdf)
+        
+      }
+      
+    }
+    
+  }
+  
+}
+
+```
+## Results:
+```{r}
+mdf
+```
+
+```{r}
+library(data.table)
+mdt <- data.table(mdf)
+```
+
+## Find out which hyperparameters performed the best
+
+```{r}
+mdt[,max(valavg),by=kernel]
+```
+```{r}
+mdt[mdt[, .I[valavg == max(valavg)]]]
+```
+
+### Radial and polynomial kernels performed better than linear and sigmoid. The highest average accuracies on the validation folds were from the polynomial kernel. Three sets of hyperparameters tied in their average validation accuracy, shown above. All had degree at 5 and coef0 at 0, while cost and gamma differed. 
+
+## Problem 1(c)
+
+### For your best model from Problem 1b, retrain it on the full training set (the 80% that was used for training and validation) and compute the accuracy on the test dataset (the 20% that until this point was untouched)
+
+### I arbitrarily chose the model with a polynomial kernel, a cost of 1, gamma of 1, coef0 of 0, and a degree of 5 out of the three models that performed the best on average for the validation folds. 
+
+```{r}
+n = nrow(admits) 
+sample = sample.int(n = n, size = floor(.2*n), replace = F)
+train = admits[-sample,]; test = admits[sample,]
+```
+
+```{r}
+smodel <- svm(factor(admit)~.,kernel='polynomial',cost=1,gamma=1,coef0=0,degree=5, data=train)
+testpredict = predict(smodel,newdata=test)
+finaltest = confusionMatrix(factor(test$admit), testpredict)
+testacc = finaltest$overall['Accuracy']
+testacc
+```
+
+### This model predicted accurately 70% of the test set, slightly lower than the average validation accuracy received before. 
+
