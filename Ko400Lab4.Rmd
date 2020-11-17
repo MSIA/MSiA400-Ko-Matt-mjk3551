@@ -1,0 +1,501 @@
+---
+title: "MSiA 400 Lab Assignment 4"
+subtitle: "Matt Ko: mjk3551"
+output: pdf_document
+df_print: default
+geometry: margin=1.5cm
+papersize: a4
+header-includes:
+  \setlength{\headsep}{1cm}
+  \usepackage{titling}
+  \setlength{\droptitle}{5cm}
+  \usepackage{tabu} 
+  \usepackage{longtable} 
+  \usepackage{booktabs} 
+  \usepackage{array}
+  \usepackage{multirow} 
+  \usepackage{wrapfig} 
+  \usepackage{colortbl} 
+  \usepackage{xcolor}
+  \usepackage{pdflscape} 
+  \usepackage{threeparttable} 
+  \usepackage{threeparttablex}
+  \usepackage[normalem]{ulem} 
+  \usepackage{makecell} 
+  \usepackage{floatrow} 
+  \usepackage{float}
+  \floatsetup[figure]{capposition=top} 
+  \usepackage[tableposition=top]{caption}
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
+library(tidyverse)
+```
+
+
+# Problem 1a) For each of the 12 variables, plot the distribution using either a histogram or stem-and-leaf plot, whichever you deem more appropriate (for each variable).
+
+```{r}
+wine = read.delim("redwine.txt")
+```
+
+
+```{r}
+hist(wine$QA)
+```
+
+```{r}
+hist(wine$FA)
+```
+```{r}
+hist(wine$VA)
+```
+```{r}
+hist(wine$CA)
+```
+
+```{r}
+hist(wine$RS)
+```
+```{r}
+hist(wine$CH)
+```
+```{r}
+hist(wine$FS)
+```
+```{r}
+hist(wine$SD)
+```
+```{r}
+hist(wine$DE)
+```
+```{r}
+hist(wine$PH)
+```
+```{r}
+hist(wine$SU)
+```
+```{r}
+hist(wine$AL)
+```
+
+# Problem 1b) For each variable, plot the distribution using a box-and-whisker plot. Are there any significant outliers? Note: some variables have comparable scales, while others do not.
+
+```{r}
+boxplot(wine)
+```
+
+
+
+```{r}
+boxplot(wine %>% select(3,4,6,9))
+```
+
+```{r}
+boxplot(wine %>% select(1,2,12))
+```
+```{r}
+boxplot(wine %>% select(5,10,11))
+```
+```{r}
+boxplot(wine %>% select(7,8))
+```
+
+### The various box plots indicatet hat there are significant outliers among the variables. 
+
+# Problem 1c)
+
+```{r}
+library(e1071)
+```
+
+```{r}
+skewness(wine$QA)
+kurtosis(wine$QA)
+```
+
+```{r}
+skewness(wine$FA)
+kurtosis(wine$FA)
+
+```
+```{r}
+skewness(wine$VA)
+kurtosis(wine$VA)
+```
+```{r}
+skewness(wine$CA)
+kurtosis(wine$CA)
+```
+
+```{r}
+skewness(wine$RS,na.rm = TRUE)
+kurtosis(wine$RS,na.rm = TRUE)
+```
+```{r}
+skewness(wine$CH)
+kurtosis(wine$CH)
+```
+```{r}
+skewness(wine$FS)
+kurtosis(wine$FS)
+```
+```{r}
+skewness(wine$SD,na.rm = TRUE)
+kurtosis(wine$SD,na.rm = TRUE)
+```
+```{r}
+skewness(wine$DE)
+kurtosis(wine$DE)
+```
+```{r}
+skewness(wine$PH)
+kurtosis(wine$PH)
+```
+```{r}
+skewness(wine$SU)
+kurtosis(wine$SU)
+```
+```{r}
+skewness(wine$AL)
+kurtosis(wine$AL)
+```
+
+## No variables were left skewed. SU, SD, FS, CH, RS, were significantly right skewed while the others were slightly right skewed. SD, FA, VA, FS were around 3 and therefore likely mesokurtic. SU, PH, CH, RS were significantly greater than 3, so leptokurtic. AL, DE, CA, QA were significantly less than 3 so platykurtic.
+
+# 1d) For each variable, display the Q-Q plot. Do they confirm your observations from previous parts of Problem 1?
+
+```{r}
+qqnorm(wine$QA, pch = 1, frame = FALSE)
+qqline(wine$QA, col = "steelblue", lwd = 2)
+```
+```{r}
+qqnorm(wine$FA, pch = 1, frame = FALSE)
+qqline(wine$FA, col = "steelblue", lwd = 2)
+```
+
+```{r}
+qqnorm(wine$VA, pch = 1, frame = FALSE)
+qqline(wine$VA, col = "steelblue", lwd = 2)
+```
+```{r}
+qqnorm(wine$CA, pch = 1, frame = FALSE)
+qqline(wine$CA, col = "steelblue", lwd = 2)
+```
+```{r}
+qqnorm(wine$RS, pch = 1, frame = FALSE)
+qqline(wine$RS, col = "steelblue", lwd = 2)
+```
+```{r}
+qqnorm(wine$CH, pch = 1, frame = FALSE)
+qqline(wine$CH, col = "steelblue", lwd = 2)
+```
+```{r}
+qqnorm(wine$FS, pch = 1, frame = FALSE)
+qqline(wine$FS, col = "steelblue", lwd = 2)
+```
+
+
+```{r}
+qqnorm(wine$SD, pch = 1, frame = FALSE)
+qqline(wine$SD, col = "steelblue", lwd = 2)
+```
+
+```{r}
+qqnorm(wine$DE, pch = 1, frame = FALSE)
+qqline(wine$DE, col = "steelblue", lwd = 2)
+```
+
+```{r}
+qqnorm(wine$PH, pch = 1, frame = FALSE)
+qqline(wine$PH, col = "steelblue", lwd = 2)
+```
+
+```{r}
+qqnorm(wine$SU, pch = 1, frame = FALSE)
+qqline(wine$SU, col = "steelblue", lwd = 2)
+```
+
+```{r}
+qqnorm(wine$AL, pch = 1, frame = FALSE)
+qqline(wine$AL, col = "steelblue", lwd = 2)
+```
+
+## The QQ plots confirm observations above, especially in terms of skew showing that none are left skewed. Additionally, the type of kurtosis is apparent for each variable in the given QQ plots.
+
+# Problem 2
+
+## 2a) Use is.na to determine which variables have missing values. How many missing values are there in each variable (Hint: use colSums)? How many samples have missing values (Hint: use rowSums)?
+
+```{r}
+colSums(is.na(wine))
+```
+
+```{r}
+#rowSums(is.na(wine))
+sum(rowSums(is.na(wine)))
+```
+
+```{r}
+length(rowSums(is.na(wine)))
+```
+
+
+## 2b) 
+
+### Split the dataset into 5-folds. For each fold, use random sampling (from the training set) to fill in the missing values. Train a linear regression model. Compute the Mean Squared Error (MSE)
+
+```{r}
+set.seed(314159)
+n = nrow(wine) # number of samples
+```
+```{r, message=F, warning=F}
+library(caret)
+```
+```{r kFold}
+nfolds = 5
+folds = createFolds(1:n, k=nfolds)
+```
+
+### Random Sampling
+
+
+```{r}
+tMSE <- vector()
+vMSE <- vector()
+for (i in 1:nfolds){
+      train = wine[-folds[[i]],]
+      validation = wine[folds[[i]],]
+      
+      sampRS <- train$RS[!is.na(train$RS)]
+      sampSD <- train$SD[!is.na(train$SD)]
+      train$RS[is.na(train$RS)] <- sample(sampRS,length(train$RS[is.na(train$RS)]),replace = TRUE)
+      validation$RS[is.na(validation$RS)] <- sample(sampRS,length(validation$RS[is.na(validation$RS)]),replace = TRUE)
+      
+      train$SD[is.na(train$SD)] <- sample(sampSD,length(train$SD[is.na(train$SD)]),replace = TRUE)
+      validation$SD[is.na(validation$SD)] <- sample(sampSD,length(validation$SD[is.na(validation$SD)]),replace = TRUE)
+      
+      model <- lm(QA~., data = train)
+      trainpredict = predict(model)
+      valpredict = predict(model,newdata=validation)
+      
+      trainMSE <- mean((train$QA - trainpredict)^2)
+      valMSE <- mean((validation$QA - valpredict)^2)
+      
+      tMSE <- append(tMSE,trainMSE)
+      vMSE <- append(vMSE,valMSE)
+      
+      
+}
+print("Mean Training MSE")
+print(mean(tMSE))
+print("Mean Validation MSE")
+print(mean(vMSE))
+
+```
+
+## 2c) Most common value
+
+```{r}
+tMSE <- vector()
+vMSE <- vector()
+for (i in 1:nfolds){
+      train = wine[-folds[[i]],]
+      validation = wine[folds[[i]],]
+      
+      sampRS <- train$RS[!is.na(train$RS)]
+      sampSD <- train$SD[!is.na(train$SD)]
+      
+      cRS <- table(sampRS)
+      RScom <- as.numeric(names(cRS)[which(cRS==max(cRS))])
+      
+      cSD <- table(sampSD)
+      SDcom <- as.numeric(names(cSD)[which(cSD==max(cSD))])
+      
+      train$RS[is.na(train$RS)] <- RScom
+      validation$RS[is.na(validation$RS)] <- RScom
+      
+      
+      
+      train$SD[is.na(train$SD)] <- SDcom
+      validation$SD[is.na(validation$SD)] <- SDcom
+      
+      model <- lm(QA~., data = train)
+      trainpredict = predict(model)
+      valpredict = predict(model,newdata=validation)
+      
+      trainMSE <- mean((train$QA - trainpredict)^2)
+      valMSE <- mean((validation$QA - valpredict)^2)
+      
+      tMSE <- append(tMSE,trainMSE)
+      vMSE <- append(vMSE,valMSE)
+      
+      print(length(validation$QA))
+      print(length(valpredict))
+      
+      
+}
+print("Mean Training MSE")
+print(mean(tMSE))
+print("Mean Validation MSE")
+print(mean(vMSE))
+
+```
+
+## 2d) Average Value
+
+```{r}
+tMSE <- vector()
+vMSE <- vector()
+for (i in 1:nfolds){
+      train = wine[-folds[[i]],]
+      validation = wine[folds[[i]],]
+      
+      sampRS <- train$RS[!is.na(train$RS)]
+      sampSD <- train$SD[!is.na(train$SD)]
+      
+      meanRS <- mean(sampRS)
+      meanSD <- mean(sampSD)
+      
+      train$RS[is.na(train$RS)] <- meanRS
+      validation$RS[is.na(validation$RS)] <- meanRS
+      
+      train$SD[is.na(train$SD)] <- meanSD
+      validation$SD[is.na(validation$SD)] <- meanSD
+      
+      model <- lm(QA~., data = train)
+      
+      trainpredict = predict(model)
+      valpredict = predict(model,newdata=validation)
+      
+      trainMSE <- mean((train$QA - trainpredict)^2)
+      valMSE <- mean((validation$QA - valpredict)^2)
+      
+      tMSE <- append(tMSE,trainMSE)
+      vMSE <- append(vMSE,valMSE)
+      
+      
+}
+print("Mean Training MSE")
+print(mean(tMSE))
+print("Mean Validation MSE")
+print(mean(vMSE))
+
+```
+
+
+## 2e KNN
+
+```{r}
+library(DMwR)
+```
+
+
+```{r}
+tMSE <- vector()
+vMSE <- vector()
+for (i in 1:nfolds){
+      train = wine[-folds[[i]],]
+      validation = wine[folds[[i]],]
+      
+      train <- knnImputation(train,k=5)
+      validation <- knnImputation(validation,k=5)
+      
+      model <- lm(QA~., data = train)
+      
+      trainpredict = predict(model)
+      valpredict = predict(model,newdata=validation)
+      
+      trainMSE <- mean((train$QA - trainpredict)^2)
+      valMSE <- mean((validation$QA - valpredict)^2)
+      
+      tMSE <- append(tMSE,trainMSE)
+      vMSE <- append(vMSE,valMSE)
+      
+      
+}
+print("Mean Training MSE")
+print(mean(tMSE))
+print("Mean Validation MSE")
+print(mean(vMSE))
+
+```
+
+## 2f) MICE
+```{r}
+library(mice)
+```
+
+```{r}
+tMSE <- vector()
+vMSE <- vector()
+for (i in 1:nfolds){
+      #Ignore rows for the test set
+      ignore = ifelse(1:nrow(wine) %in% folds[[i]], TRUE, FALSE)
+      wineCopy <- wine
+      wineCopy <- complete(mice(wineCopy, ignore=ignore,seed=12345, print=F,meth='pmm'))
+      train = wineCopy[-folds[[i]],]
+      validation = wineCopy[folds[[i]],]
+      
+      model <- lm(QA~., data = train)
+      
+      trainpredict = predict(model)
+      valpredict = predict(model,newdata=validation)
+      
+      trainMSE <- mean((train$QA - trainpredict)^2)
+      valMSE <- mean((validation$QA - valpredict)^2)
+      
+      
+      
+      tMSE <- append(tMSE,trainMSE)
+      vMSE <- append(vMSE,valMSE)
+      
+      
+}
+print("Mean Training MSE")
+print(mean(tMSE))
+print("Mean Validation MSE")
+print(mean(vMSE))
+
+```
+
+
+## 2g) Remove NA
+
+```{r}
+tMSE <- vector()
+vMSE <- vector()
+for (i in 1:nfolds){
+      train = wine[-folds[[i]],]
+      validation = wine[folds[[i]],]
+      
+      train <- na.omit(train)
+      validation <- na.omit(validation)
+      
+      model <- lm(QA~., data = train)
+      
+      trainpredict = predict(model)
+      valpredict = predict(model,newdata=validation)
+      
+      trainMSE <- mean((train$QA - trainpredict)^2)
+      valMSE <- mean((validation$QA - valpredict)^2)
+      
+      tMSE <- append(tMSE,trainMSE)
+      vMSE <- append(vMSE,valMSE)
+      
+      
+}
+print("Mean Training MSE")
+print(mean(tMSE))
+print("Mean Validation MSE")
+print(mean(vMSE))
+
+```
+
+## 2h) Which method for handling missing values performs best? Why may this be?
+
+### Removing the NA's performs the best. This may be because of the fact that only a small percentage of rows had to be ommitted and the model could be trained on the remaining true values of the dataset. 
+
